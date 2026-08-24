@@ -1,11 +1,13 @@
 {
   "type": "module",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "express": "^5.2.1",
     "mysql": "^2.18.1",
     "mysql2": "^3.23.3"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
     "@types/mysql": "^2.15.27",
     "@types/node": "^26.2.0",

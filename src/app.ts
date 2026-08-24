@@ -1,30 +1,36 @@
-import express, { type Express, type Request, type Response } from "express";
+import express, {
+  type Express,
+  type Request,
+  type Response,
+} from "express";
 
-import mysql, { type ResultSetHeader } from "mysql2/promise";
-
-const connection = await mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "backendDb",
-});
+import {
+  type ResultSetHeader,
+} from "mysql2/promise";
+import { hash } from "bcrypt";
+import { isUserAndPasswordValid } from "./services/user.service.ts";
+import { connection } from "./config/db.connect.ts";
 
 const app: Express = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+
 app.post("/users", async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ message: "Username und Passwort sind erforderlich" });
+  const isValid = await isUserAndPasswordValid(username, password);
+  if(isValid) {
+    return res.status(409).json({ message: "Username ist bereits vergeben" });
   }
-
-  try {
+  else{
+    try {
+    const hashedPassword = await hash(password, 10);
     const [result] = await connection.query<ResultSetHeader>(
       "INSERT INTO users (username, password) VALUES (?, ?)",
-      [username, password],
+      [username, hashedPassword],
     );
 
     return res.status(201).json({ id: result.insertId, username });
@@ -32,25 +38,28 @@ app.post("/users", async (req: Request, res: Response) => {
     console.log(err);
     return res.status(409).json({ message: "Username ist bereits vergeben" });
   }
-});
+ }});
 
 app.get("/login", async (req: Request, res: Response) => {
   const username = String(req.query.username ?? "");
   const password = String(req.query.password ?? "");
 
-  const [users] = await connection.query(
-    "SELECT id, username FROM users WHERE username = ? AND password = ?",
-    [username, password],
-  );
-
-  if (Array.isArray(users) && users.length > 0) {
-    return res.status(200).json({ message: "Login erfolgreich", user: users[0] });
+  const isValid = await isUserAndPasswordValid(username, password);
+  if(isValid) {
+    return res.status(200).json({ message: "Login erfolgreich" });
   }
-
-  return res.status(401).json({ message: "Username oder Passwort falsch" });
+  else {
+    return res.status(401).json({ message: "Username oder Passwort falsch" });
+  }
 });
 
 app.get("/cars", async (req: Request, res: Response) => {
+  const { username, password } = req.query;
+    
+  const isValid = await isUserAndPasswordValid(String(username), String(password));
+  if(!isValid) {
+    return res.status(401).json({ message: "Username oder Passwort falsch" });
+  }
   try {
     const [rows, fields] = await connection.query("SELECT * FROM `cars`;");
 
@@ -64,6 +73,15 @@ app.get("/cars", async (req: Request, res: Response) => {
 });
 
 app.get("/cars/:id", async (req: Request, res: Response) => {
+  const { username, password } = req.query;
+  const isValid = await isUserAndPasswordValid(
+    String(username),
+    String(password),
+  );
+  if (!isValid) {
+    return res.status(401).json({ message: "Username oder Passwort falsch" });
+  }
+
   const id = req.params.id as string;
   const carId = parseInt(id, 10);
   const [results, fields] = await connection.query(
@@ -76,12 +94,11 @@ app.get("/cars/:id", async (req: Request, res: Response) => {
 app.post("/cars", async (req: Request, res: Response) => {
   const { marke, model, year, username, password } = req.body;
 
-  const [users] = await connection.query(
-    "SELECT id FROM users WHERE username = ? AND password = ?",
-    [username, password],
+  const isValid = await isUserAndPasswordValid(
+    String(username),
+    String(password),
   );
-
-  if (Array.isArray(users) && users.length > 0) {
+  if (isValid) {
 
     const newCar = {
       marke,
@@ -103,7 +120,15 @@ app.post("/cars", async (req: Request, res: Response) => {
 app.put("/cars/:id", async (req: Request, res: Response) => {
   const id = req.params.id as string;
   const carId = parseInt(id, 10);
-  const { marke, model, year } = req.body;
+  const { marke, model, year, username, password } = req.body;
+  const isValid = await isUserAndPasswordValid(
+    String(username),
+    String(password),
+  );
+  if (!isValid) {
+    return res.status(401).json({ message: "Username oder Passwort falsch" });
+  }
+
   const [results, fields] = await connection.query(
     "UPDATE cars SET marke = ?, model = ?, year = ? WHERE id = ?",
     [marke, model, year, carId],
@@ -117,6 +142,15 @@ app.put("/cars/:id", async (req: Request, res: Response) => {
 app.delete("/cars/:id", async (req: Request, res: Response) => {
   const id = req.params.id as string;
   const carId = parseInt(id, 10);
+  const { username, password } = req.body;
+  const isValid = await isUserAndPasswordValid(
+    String(username),
+    String(password),
+  );
+  if (!isValid) {
+    return res.status(401).json({ message: "Username oder Passwort falsch" });
+  }
+
   const [findResult] = await connection.query(
     "SELECT * FROM cars WHERE id = ?",
     [carId],
