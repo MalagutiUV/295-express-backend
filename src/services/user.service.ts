@@ -14,7 +14,10 @@ export const isUserAndPasswordValid = async (username: string, password: string)
 
   const user = users[0];
 
-  const isPasswordValid = await compare(password, user?.password)
+  if (!user)
+    return false;
+
+  const isPasswordValid = await compare(password, user.password)
 
   if (user && isPasswordValid) {
     return true
