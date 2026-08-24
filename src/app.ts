@@ -8,7 +8,7 @@ import {
   type ResultSetHeader,
 } from "mysql2/promise";
 import { hash } from "bcrypt";
-import { isUserAndPasswordValid } from "./services/user.service.ts";
+import { isUserAndPasswordValid, isUsernameAvailable } from "./services/user.service.ts";
 import { connection } from "./config/db.connect.ts";
 
 const app: Express = express();
@@ -51,6 +51,28 @@ app.get("/login", async (req: Request, res: Response) => {
   else {
     return res.status(401).json({ message: "Username oder Passwort falsch" });
   }
+});
+
+app.post("/register", async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+
+  const isUsernameFree = await isUsernameAvailable(username);
+  
+  if(isUsernameFree){
+    const saltRounds = 10;
+    const hashedPassword = await hash(password, saltRounds);
+
+    const [results, fields] = await connection.query(
+      "INSERT INTO users (username, password) VALUES (?, ?)",
+      [username, hashedPassword],
+    );
+
+    return res.status(200).json({"message": "register success"});
+  }
+  else {
+    return res.status(400).json({"message": "username already exists"})
+  }
+
 });
 
 app.get("/cars", async (req: Request, res: Response) => {
