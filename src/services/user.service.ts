@@ -1,6 +1,7 @@
 import type { RowDataPacket } from "mysql2";
 import { connection } from "../config/db.connect.ts";
-import { compare, hash } from "bcrypt";
+import { compare } from "bcrypt";
+
 
 export interface User extends RowDataPacket {
   password: string;

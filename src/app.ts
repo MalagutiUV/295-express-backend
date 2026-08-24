@@ -10,6 +10,7 @@ import {
 import { hash } from "bcrypt";
 import { isUserAndPasswordValid, isUsernameAvailable } from "./services/user.service.ts";
 import { connection } from "./config/db.connect.ts";
+import jwt from "jsonwebtoken";
 
 const app: Express = express();
 
@@ -45,6 +46,14 @@ app.get("/login", async (req: Request, res: Response) => {
   const password = String(req.query.password ?? "");
 
   const isValid = await isUserAndPasswordValid(username, password);
+
+  // Speichern 
+  const privateKey = "super-secret-pk"
+
+  // create jwt token and return it to client (postman, browser, curl)
+  const token = jwt.sign({username: username}, privateKey);
+
+
   if(isValid) {
     return res.status(200).json({ message: "Login erfolgreich" });
   }
@@ -76,9 +85,18 @@ app.post("/register", async (req: Request, res: Response) => {
 });
 
 app.get("/cars", async (req: Request, res: Response) => {
-  const { username, password } = req.query;
+  
+  // get token from request (header) 
+ 
+  // if token-.-.
+  // check if I created this token (valid gültig date)
+
+
+  // return data to user
+
+
     
-  const isValid = await isUserAndPasswordValid(String(username), String(password));
+  
   if(!isValid) {
     return res.status(401).json({ message: "Username oder Passwort falsch" });
   }
