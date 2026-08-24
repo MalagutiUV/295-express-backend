@@ -1,6 +1,11 @@
 USE backendDb;
 
 INSERT INTO
+  users (username, password)
+VALUES
+  ('username123', 'pw124');
+
+INSERT INTO
   cars (marke, model, year)
 VALUES
   ('Toyota', 'Camry', 2020),
