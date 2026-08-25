@@ -4,6 +4,7 @@ import { usePrivateKey } from "../config/env.connect.ts";
 import {
     createTrip,
     deleteTrip,
+    getTripById,
     getTrips,
 } from "../services/trips.service.ts";
 import { createRateLimitMiddleware } from "../middleware/rate-limit.middleware.ts";
@@ -15,6 +16,7 @@ export const createTripsRouter = () => {
 
     tripsRouter.get("/", getTrips);
     tripsRouter.post("/", createTrip);
+    tripsRouter.get("/:id", getTripById);
     tripsRouter.delete("/:id", deleteTrip);
     return tripsRouter;
 };

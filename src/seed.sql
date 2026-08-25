@@ -23,29 +23,39 @@ INSERT INTO
         driver_id,
         car_id,
         distance_km,
-        started_at
+        started_at,
+        latitude,
+        longitude,
+        weather_data,
+        status
     )
 VALUES (
         1,
         1,
         124.50,
-        '2026-08-20 08:30:00'
+        '2026-08-20 08:30:00',
+        47.3769,
+        8.5417,
+        '{"type":"historical","date":"2026-08-20","data":{"weather_code":[1]}}',
+        'completed'
     ),
     (
         2,
         3,
         86.20,
-        '2026-08-21 13:15:00'
+        '2026-08-19 13:15:00',
+        46.9480,
+        7.4474,
+        '{"type":"historical","date":"2026-08-19","data":{"weather_code":[2]}}',
+        'completed'
     ),
     (
         3,
         2,
         245.00,
-        '2026-08-22 09:00:00'
-    ),
-    (
-        1,
-        5,
-        52.75,
-        '2026-08-23 17:45:00'
+        '2026-08-18 09:00:00',
+        47.0502,
+        8.3093,
+        '{"type":"historical","date":"2026-08-18","data":{"weather_code":[3]}}',
+        'completed'
     );

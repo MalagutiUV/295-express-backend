@@ -27,6 +27,14 @@ CREATE TABLE IF NOT EXISTS trips (
     car_id INT NOT NULL,
     distance_km DECIMAL(10, 2) NOT NULL,
     started_at DATETIME NOT NULL,
+    latitude DECIMAL(10, 7),
+    longitude DECIMAL(10, 7),
+    weather_data JSON,
+    status ENUM(
+        'planned',
+        'completed',
+        'cancelled'
+    ) DEFAULT 'planned',
     FOREIGN KEY (driver_id) REFERENCES drivers (id),
     FOREIGN KEY (car_id) REFERENCES cars (id)
 );
