@@ -17,9 +17,21 @@ export const createCarsRouter = () => {
   const privateKey = usePrivateKey();
   const requireAuth = createAuthMiddleware(privateKey);
   carsRouter.use(requireAuth);
-  
+
   carsRouter.use(createRateLimitMiddleware());
+
+  /**
+   * @swagger
+   * /cars:
+   *   get:
+   *     summary: Get all cars
+   *     responses:
+   *       200:
+   *         description: A list of cars
+   */
   carsRouter.get("/", getCars);
+
+
   carsRouter.get("/:id", getCarById);
   carsRouter.post("/", createCar);
   carsRouter.put("/:id", updateCar);
