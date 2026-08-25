@@ -7,7 +7,6 @@ import {
   updateCar,
 } from "../services/cars.service.ts";
 import { createAuthMiddleware } from "../middleware/auth.middleware.ts";
-import { loadEnvFile } from "node:process";
 import { usePrivateKey } from "../config/env.connect.ts";
 
 
