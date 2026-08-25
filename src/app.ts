@@ -29,23 +29,24 @@ app.post("/users", async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   const isValid = await isUserAndPasswordValid(username, password);
-  if(isValid) {
+  if (isValid) {
     return res.status(409).json({ message: "Username ist bereits vergeben" });
   }
-  else{
+  else {
     try {
-    const hashedPassword = await hash(password, 10);
-    const [result] = await connection.query<ResultSetHeader>(
-      "INSERT INTO users (username, password) VALUES (?, ?)",
-      [username, hashedPassword],
-    );
+      const hashedPassword = await hash(password, 10);
+      const [result] = await connection.query<ResultSetHeader>(
+        "INSERT INTO users (username, password) VALUES (?, ?)",
+        [username, hashedPassword],
+      );
 
-    return res.status(201).json({ id: result.insertId, username });
-  } catch (err) {
-    console.log(err);
-    return res.status(409).json({ message: "Username ist bereits vergeben" });
+      return res.status(201).json({ id: result.insertId, username });
+    } catch (err) {
+      console.log(err);
+      return res.status(409).json({ message: "Username ist bereits vergeben" });
+    }
   }
- }});
+});
 
 app.get("/login", async (req: Request, res: Response) => {
   const username = String(req.query.username ?? "");
@@ -55,10 +56,10 @@ app.get("/login", async (req: Request, res: Response) => {
 
   const privateKey = usePrivateKey();
   // create jwt token and return it to client (postman, browser, curl)
-  const token = jwt.sign({username: username}, privateKey);
+  const token = jwt.sign({ username: username }, privateKey);
 
 
-  if(isValid) {
+  if (isValid) {
     return res.status(200).json({ message: "Login erfolgreich", token: token });
   }
   else {
@@ -70,8 +71,8 @@ app.post("/register", async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   const isUsernameFree = await isUsernameAvailable(username);
-  
-  if(isUsernameFree){
+
+  if (isUsernameFree) {
     const saltRounds = 10;
     const hashedPassword = await hash(password, saltRounds);
 
@@ -80,10 +81,10 @@ app.post("/register", async (req: Request, res: Response) => {
       [username, hashedPassword],
     );
 
-    return res.status(200).json({"message": "register success"});
+    return res.status(200).json({ "message": "register success" });
   }
   else {
-    return res.status(400).json({"message": "username already exists"})
+    return res.status(400).json({ "message": "username already exists" })
   }
 
 });
