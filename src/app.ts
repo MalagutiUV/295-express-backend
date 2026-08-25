@@ -13,13 +13,10 @@ import { connection } from "./config/db.connect.ts";
 import jwt from "jsonwebtoken";
 import { loadEnvFile } from "node:process";
 import { createCarsRouter } from "./routes/cars.routes.ts";
+import { usePrivateKey } from "./config/env.connect.ts";
 
 loadEnvFile();
 
-const privateKey = process.env.TOKEN_PRIVATE_KEY;
-if (!privateKey) {
-  throw new Error("TOKEN_PRIVATE_KEY is required in .env");
-}
 
 const app: Express = express();
 
@@ -56,6 +53,7 @@ app.get("/login", async (req: Request, res: Response) => {
 
   const isValid = await isUserAndPasswordValid(username, password);
 
+  const privateKey = usePrivateKey();
   // create jwt token and return it to client (postman, browser, curl)
   const token = jwt.sign({username: username}, privateKey);
 
