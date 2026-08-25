@@ -11,6 +11,15 @@ import { hash } from "bcrypt";
 import { isUserAndPasswordValid, isUsernameAvailable } from "./services/user.service.ts";
 import { connection } from "./config/db.connect.ts";
 import jwt from "jsonwebtoken";
+import { loadEnvFile } from "node:process";
+import { createCarsRouter } from "./routes/cars.routes.ts";
+
+loadEnvFile();
+
+const privateKey = process.env.TOKEN_PRIVATE_KEY;
+if (!privateKey) {
+  throw new Error("TOKEN_PRIVATE_KEY is required in .env");
+}
 
 const app: Express = express();
 
@@ -47,15 +56,12 @@ app.get("/login", async (req: Request, res: Response) => {
 
   const isValid = await isUserAndPasswordValid(username, password);
 
-  // Speichern 
-  const privateKey = "super-secret-pk"
-
   // create jwt token and return it to client (postman, browser, curl)
   const token = jwt.sign({username: username}, privateKey);
 
 
   if(isValid) {
-    return res.status(200).json({ message: "Login erfolgreich" });
+    return res.status(200).json({ message: "Login erfolgreich", token: token });
   }
   else {
     return res.status(401).json({ message: "Username oder Passwort falsch" });
@@ -84,126 +90,8 @@ app.post("/register", async (req: Request, res: Response) => {
 
 });
 
-app.get("/cars", async (req: Request, res: Response) => {
-  
-  // get token from request (header) 
- 
-  // if token-.-.
-  // check if I created this token (valid gültig date)
+app.use("/cars", createCarsRouter());
 
 
-  // return data to user
-
-
-    
-  
-  if(!isValid) {
-    return res.status(401).json({ message: "Username oder Passwort falsch" });
-  }
-  try {
-    const [rows, fields] = await connection.query("SELECT * FROM `cars`;");
-
-    console.log(rows); // results contains rows returned by server
-    console.log(fields); // fields contains extra meta data about results, if available
-
-    return res.status(200).json(rows);
-  } catch (err) {
-    console.log(err);
-  }
-});
-
-app.get("/cars/:id", async (req: Request, res: Response) => {
-  const { username, password } = req.query;
-  const isValid = await isUserAndPasswordValid(
-    String(username),
-    String(password),
-  );
-  if (!isValid) {
-    return res.status(401).json({ message: "Username oder Passwort falsch" });
-  }
-
-  const id = req.params.id as string;
-  const carId = parseInt(id, 10);
-  const [results, fields] = await connection.query(
-    "SELECT * FROM cars WHERE id = ?",
-    [carId],
-  );
-  return res.status(200).json(results);
-});
-
-app.post("/cars", async (req: Request, res: Response) => {
-  const { marke, model, year, username, password } = req.body;
-
-  const isValid = await isUserAndPasswordValid(
-    String(username),
-    String(password),
-  );
-  if (isValid) {
-
-    const newCar = {
-      marke,
-      model,
-      year,
-    };
-
-    const [results, fields] = await connection.query(
-      "INSERT INTO cars (marke, model, year) VALUES (?, ?, ?)",
-      [newCar.marke, newCar.model, newCar.year],
-    );
-
-    return res.status(201).json({ id: results, ...newCar });
-  }
-
-  return res.status(401).json({ message: "Unauthorized" });
-});
-
-app.put("/cars/:id", async (req: Request, res: Response) => {
-  const id = req.params.id as string;
-  const carId = parseInt(id, 10);
-  const { marke, model, year, username, password } = req.body;
-  const isValid = await isUserAndPasswordValid(
-    String(username),
-    String(password),
-  );
-  if (!isValid) {
-    return res.status(401).json({ message: "Username oder Passwort falsch" });
-  }
-
-  const [results, fields] = await connection.query(
-    "UPDATE cars SET marke = ?, model = ?, year = ? WHERE id = ?",
-    [marke, model, year, carId],
-  );
-
-  console.log(results);
-
-  return res.status(200).json({ id: carId, marke, model, year });
-});
-
-app.delete("/cars/:id", async (req: Request, res: Response) => {
-  const id = req.params.id as string;
-  const carId = parseInt(id, 10);
-  const { username, password } = req.body;
-  const isValid = await isUserAndPasswordValid(
-    String(username),
-    String(password),
-  );
-  if (!isValid) {
-    return res.status(401).json({ message: "Username oder Passwort falsch" });
-  }
-
-  const [findResult] = await connection.query(
-    "SELECT * FROM cars WHERE id = ?",
-    [carId],
-  );
-
-  const [results, fields] = await connection.query(
-    "DELETE FROM cars WHERE id = ?",
-    [carId],
-  );
-
-  return res
-    .status(200)
-    .json({ message: `Car with id ${carId} deleted successfully` });
-});
 
 app.listen(3000);
