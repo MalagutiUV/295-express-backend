@@ -6,10 +6,13 @@ import {
     deleteTrip,
     getTrips,
 } from "../services/trips.service.ts";
+import { createRateLimitMiddleware } from "../middleware/rate-limit.middleware.ts";
 
 export const createTripsRouter = () => {
     const tripsRouter = Router();
     tripsRouter.use(createAuthMiddleware(usePrivateKey()));
+    tripsRouter.use(createRateLimitMiddleware());
+
     tripsRouter.get("/", getTrips);
     tripsRouter.post("/", createTrip);
     tripsRouter.delete("/:id", deleteTrip);

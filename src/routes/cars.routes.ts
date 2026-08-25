@@ -8,6 +8,7 @@ import {
 } from "../services/cars.service.ts";
 import { createAuthMiddleware } from "../middleware/auth.middleware.ts";
 import { usePrivateKey } from "../config/env.connect.ts";
+import { createRateLimitMiddleware } from "../middleware/rate-limit.middleware.ts";
 
 
 
@@ -15,8 +16,9 @@ export const createCarsRouter = () => {
   const carsRouter = Router();
   const privateKey = usePrivateKey();
   const requireAuth = createAuthMiddleware(privateKey);
-
   carsRouter.use(requireAuth);
+  
+  carsRouter.use(createRateLimitMiddleware());
   carsRouter.get("/", getCars);
   carsRouter.get("/:id", getCarById);
   carsRouter.post("/", createCar);

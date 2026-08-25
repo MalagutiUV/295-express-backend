@@ -10,7 +10,6 @@ export const createRateLimitMiddleware = (
     windowMs = 60_000,
 ): RequestHandler => {
     const requestsByClient = new Map<string, RequestCounter>();
-
     return (req, res, next) => {
         const clientId = req.ip ?? req.socket.remoteAddress ?? "unknown";
         const now = Date.now();
