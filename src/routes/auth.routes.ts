@@ -9,6 +9,36 @@ export const createAuthRouter = () => {
 
     authRouter.use(createRateLimitMiddleware());
 
+    /**
+     * @swagger
+     * /auth/login:
+     *   post:
+     *     summary: Log in and receive a JWT
+     *     security: []
+     *     tags: [Authentication]
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: '#/components/schemas/LoginRequest'
+     *     responses:
+     *       200:
+     *         description: Login successful
+     *         content:
+     *           application/json:
+     *             schema: { $ref: '#/components/schemas/AuthResponse' }
+     *       400:
+     *         description: Username and password are required
+     *         content:
+     *           application/json:
+     *             schema: { $ref: '#/components/schemas/Error' }
+     *       401:
+     *         description: Invalid username or password
+     *         content:
+     *           application/json:
+     *             schema: { $ref: '#/components/schemas/Error' }
+     */
     authRouter.post("/login", async (req, res) => {
         const { username, password } = req.body;
 
@@ -25,6 +55,40 @@ export const createAuthRouter = () => {
         return res.status(200).json({ message: "Login erfolgreich", token });
     });
 
+    /**
+     * @swagger
+     * /auth/register:
+     *   post:
+     *     summary: Register a user
+     *     security: []
+     *     tags: [Authentication]
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: '#/components/schemas/RegisterRequest'
+     *     responses:
+     *       201:
+     *         description: User created
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 id: { type: integer, example: 1 }
+     *                 username: { type: string, example: max.mustermann }
+     *       400:
+     *         description: Username and password are required
+     *         content:
+     *           application/json:
+     *             schema: { $ref: '#/components/schemas/Error' }
+     *       409:
+     *         description: Username is already taken
+     *         content:
+     *           application/json:
+     *             schema: { $ref: '#/components/schemas/Error' }
+     */
     authRouter.post("/register", async (req, res) => {
         const { username, password } = req.body;
 
