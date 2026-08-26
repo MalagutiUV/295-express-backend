@@ -16,8 +16,10 @@ export const getCarById = async (req: Request, res: Response) => {
   return res.status(200).json(results);
 };
 
+
 export const createCar = async (req: Request, res: Response) => {
   const { marke, model, year } = req.body;
+
   const [result] = await connection.query<ResultSetHeader>(
     "INSERT INTO cars (marke, model, year) VALUES (?, ?, ?)",
     [marke, model, year],
