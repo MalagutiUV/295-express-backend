@@ -20,7 +20,6 @@ export const useDbConfig = () => {
   const dbPassword = getEnv("DB_PASSWORD");
   const dbPort = parseInt(getEnv("DB_PORT") ?? "", 10);
   const dbUser = getEnv("DB_USER");
-
   if (!dbHost) {
     throw new Error("DB_HOST ist missing")
   }
