@@ -1,9 +1,14 @@
-import { loadEnvFile } from "process";
+import { existsSync } from "node:fs";
+import { loadEnvFile } from "node:process";
 
-loadEnvFile();
+if (existsSync(".env")) {
+  loadEnvFile();
+}
+
+const getEnv = (name: string) => process.env[name]?.replace(/^("|')|("|')$/g, "");
 
 export const usePrivateKey = () => {
-  const privateKey = process.env.TOKEN_PRIVATE_KEY;
+  const privateKey = getEnv("TOKEN_PRIVATE_KEY");
   if (!privateKey) {
     throw new Error("TOKEN_PRIVATE_KEY is required in .env");
   }
@@ -11,10 +16,10 @@ export const usePrivateKey = () => {
 }
 
 export const useDbConfig = () => {
-  const dbHost = process.env.DB_HOST;
-  const dbPassword = process.env.DB_PASSWORD;
-  const dbPort = parseInt(process.env.DB_PORT!, 10);
-  const dbUser = process.env.DB_USER;
+  const dbHost = getEnv("DB_HOST");
+  const dbPassword = getEnv("DB_PASSWORD");
+  const dbPort = parseInt(getEnv("DB_PORT") ?? "", 10);
+  const dbUser = getEnv("DB_USER");
 
   if (!dbHost) {
     throw new Error("DB_HOST ist missing")
